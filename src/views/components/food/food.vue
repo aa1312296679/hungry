@@ -22,7 +22,7 @@
               <span class="now">￥{{food.price}}</span><span class="old" v-show="food.oldPrice">￥{{food.oldPrice}}</span>
             </div>
             <div class="cart-control-wrapper">
-              <cart-control @add="addFood" :food="food"></cart-control>
+              <cart-control @add="addFood" :good="food"></cart-control>
             </div>
             <transition name="fade">
               <div @click="addFirst" class="buy" v-show="!food.count">
@@ -80,7 +80,6 @@
   import ratingMixin from 'common/mixins/rating'
   import popupMixin from 'common/mixins/popup'
 
-  const EVENT_SHOW = 'show'
   const EVENT_ADD = 'add'
   const EVENT_LEAVE = 'leave'
 
@@ -106,12 +105,8 @@
         return this.food.ratings
       }
     },
-    created() {
-      this.$on(EVENT_SHOW, () => {
-        this.$nextTick(() => {
-          this.$refs.scroll.refresh()
-        })
-      })
+    mounted(){
+      this.$refs.scroll.refresh()
     },
     methods: {
       afterLeave() {

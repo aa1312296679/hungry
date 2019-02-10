@@ -8,6 +8,7 @@
   export default {
     name: 'bubble',
     props: {
+      // 商品总数
       num: {
         type: Number
       }

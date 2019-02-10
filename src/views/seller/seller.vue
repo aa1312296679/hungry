@@ -35,9 +35,9 @@
           {
             // 选项卡名
             label: '商品',
-            // 组件类
+            // tab页的页面组件
             component: Goods,
-            // tab页所需的商家信息
+            // tab页的数据源
             data: {
               seller: this.seller
             }
@@ -66,6 +66,7 @@
     methods: {
       // 跨域请求商家信息
       _getSeller() {
+        // 根据当前商家页接收的商家id跨域请求商家信息
         getSeller({
           id: this.seller.id
         }).then((seller) => {

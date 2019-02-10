@@ -20,6 +20,9 @@
           </div>
         </div>
       </div>
+      <!--
+          购物车的购物动画球容器
+      -->
       <div class="ball-container">
         <div v-for="(ball,index) in balls" :key="index">
           <transition
@@ -39,30 +42,26 @@
 <script>
   import Bubble from 'components/bubble/bubble'
 
+  // 购物动画球总数
   const BALL_LEN = 10
   const innerClsHook = 'inner-hook'
-
-  function createBalls() {
-    let balls = []
-    for (let i = 0; i < BALL_LEN; i++) {
-      balls.push({show: false})
-    }
-    return balls
-  }
 
   export default {
     name: 'shop-cart',
     props: {
+      // 所有选中的商品
       selectFoods: {
         type: Array,
         default() {
           return []
         }
       },
+      // 商品配送费
       deliveryPrice: {
         type: Number,
         default: 0
       },
+      // 商品配送起步价
       minPrice: {
         type: Number,
         default: 0
@@ -78,14 +77,16 @@
     },
     data() {
       return {
-        balls: createBalls(),
+        balls: null,
         listFold: this.fold
       }
     },
     created() {
       this.dropBalls = []
+      this.balls=this.createBalls();
     },
     computed: {
+      // 商品总价
       totalPrice() {
         let total = 0
         this.selectFoods.forEach((food) => {
@@ -93,6 +94,7 @@
         })
         return total
       },
+      // 选中商品的商品总数
       totalCount() {
         let count = 0
         this.selectFoods.forEach((food) => {
@@ -100,6 +102,7 @@
         })
         return count
       },
+      // 商品购物车提示信息
       payDesc() {
         if (this.totalPrice === 0) {
           return `￥${this.minPrice}元起送`
@@ -110,6 +113,7 @@
           return '去结算'
         }
       },
+      // 商品购物车按钮状态
       payClass() {
         if (!this.totalCount || this.totalPrice < this.minPrice) {
           return 'not-enough'
@@ -142,6 +146,7 @@
         }).show()
         e.stopPropagation()
       },
+      // 商品递增的购物球动画处理
       drop(el) {
         for (let i = 0; i < this.balls.length; i++) {
           const ball = this.balls[i]
@@ -153,11 +158,22 @@
           }
         }
       },
+      // 初始化购物车的所有购物动画球
+     createBalls() {
+        let balls = []
+        for (let i = 0; i < BALL_LEN; i++) {
+          balls.push({show: false})
+        }
+        return balls
+      },
+      // 购物球的过渡动画
       beforeDrop(el) {
+        // 计算购物动画球的球体位置
         const ball = this.dropBalls[this.dropBalls.length - 1]
         const rect = ball.el.getBoundingClientRect()
         const x = rect.left - 32
         const y = -(window.innerHeight - rect.top - 22)
+        // 通过贝塞尔曲线实现购物动画球的抛物线效果
         el.style.display = ''
         el.style.transform = el.style.webkitTransform = `translate3d(0,${y}px,0)`
         const inner = el.getElementsByClassName(innerClsHook)[0]
@@ -171,7 +187,9 @@
         el.addEventListener('transitionend', done)
       },
       afterDrop(el) {
+        // 取出所有动画球中处于显示状态的动画球
         const ball = this.dropBalls.shift()
+        // 将动画球重置为隐藏
         if (ball) {
           ball.show = false
           el.style.display = 'none'

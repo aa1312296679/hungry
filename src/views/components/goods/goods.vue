@@ -1,6 +1,9 @@
 <template>
   <div class="goods" v-show="showStatus">
     <div class="scroll-nav-wrapper">
+      <!--
+        生成滚动侧边栏导航
+      -->
       <cube-scroll-nav
         :side=true
         :data="goods"
@@ -8,7 +11,7 @@
         v-if="goods.length"
       >
         <!--
-          定义侧边栏的输出内容的HTML
+          配置滚动侧边栏的输出内容的HTML
         -->
         <template slot="bar" slot-scope="props">
           <cube-scroll-nav-bar
@@ -20,18 +23,20 @@
             <template slot-scope="props">
               <div class="text">
                 <!--
-                  如果当前输出的侧边栏的商品类型存在ico
-                  输出该商品类型的侧边栏导航的ico
+                  如果当前输出的侧边栏的商品类型存在ico图标
+                  输出该商品类型的侧边栏导航的ico图标
                 -->
                 <support-ico
                   v-if="props.txt.type>=1"
                   :size=3
                   :type="props.txt.type"
                 ></support-ico>
-                <!--输出当前商品类的商品类名-->
+                <!--
+                  当前商品类的商品类名称
+                -->
                 <span>{{props.txt.name}}</span>
                 <!--
-                  如果某个商品类的商品总数存在则输出商品总数
+                   商品类侧边栏的商品总数
                 -->
                 <span class="num" v-if="props.txt.count">
                   <bubble :num="props.txt.count"></bubble>
@@ -40,6 +45,9 @@
             </template>
           </cube-scroll-nav-bar>
         </template>
+        <!--
+          遍历输出所有商品类的商品面板
+        -->
         <cube-scroll-nav-panel
           v-for="good in goods"
           :key="good.name"
@@ -47,6 +55,9 @@
           :title="good.name"
         >
           <ul>
+            <!--
+             遍历输出当前商品面板下的所有商品信息
+            -->
             <li
               @click="selectFood(food)"
               v-for="food in good.foods"
@@ -67,7 +78,7 @@
                   <span class="old" v-show="food.oldPrice">￥{{food.oldPrice}}</span>
                 </div>
                 <div class="cart-control-wrapper">
-                  <cart-control @add="onAdd" :food="food"></cart-control>
+                  <cart-control @add="onAdd" :good="food"></cart-control>
                 </div>
               </div>
             </li>
@@ -96,6 +107,7 @@
   export default {
     name: 'goods',
     props: {
+      // 商品页的数据源
       data: {
         type: Object,
         default() {
@@ -105,31 +117,37 @@
     },
     data() {
       return {
+        // 商品信息
         goods: [],
+        // 选中商品
         selectedFood: {},
+        // scroll-nav导航的配置信息
         scrollOptions: {
           click: false,
           directionLockThreshold: 0
         },
+        // 商品页显示状态
         showStatus:false
       }
     },
     computed: {
+      // 解析商品页数据源的商品数据
       seller() {
         return this.data.seller
       },
+      // 所有选中商品
       selectFoods() {
-        let foods = []
-        this.goods.forEach((good) => {
-          good.foods.forEach((food) => {
-            if (food.count) {
-              foods.push(food)
+        let selectedGoods = []
+        this.goods.forEach((item) => {
+          item.foods.forEach((item) => {
+            if (item.count) {
+              selectedGoods.push(item)
             }
           })
         })
-        return foods
+        return selectedGoods
       },
-      // 计算商品类信息
+      // 所有商品类别
       barTxts() {
         // 所有的商品类信息
         let ret = []
@@ -152,6 +170,7 @@
       }
     },
     methods: {
+      // 跨域请求商品页的商品数据
       fetch() {
         if (!this.fetched) {
           this.fetched = true
@@ -162,14 +181,18 @@
           })
         }
       },
+      // 商品面板的商品信息点击处理
       selectFood(food) {
+        // 获取选中商品的商品信息
         this.selectedFood = food
+        // 显示商品页信息
         this._showFood()
         this._showShopCartSticky()
       },
       onAdd(target) {
         this.$refs.shopCart.drop(target)
       },
+      // 显示商品页信息
       _showFood() {
         this.foodComp = this.foodComp || this.$createFood({
           $props: {
