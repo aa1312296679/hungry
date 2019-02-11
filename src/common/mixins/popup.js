@@ -8,10 +8,12 @@ export default {
     }
   },
   methods: {
+    // 显示组件
     show() {
       this.visible = true
       this.$emit(EVENT_SHOW)
     },
+    // 隐藏组件
     hide() {
       this.visible = false
       this.$emit(EVENT_HIDE)

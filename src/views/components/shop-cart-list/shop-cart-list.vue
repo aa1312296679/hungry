@@ -1,5 +1,9 @@
 <template>
   <transition name="fade">
+     <!--
+        基于popup实现购物列表弹出层
+        购物列表弹出层默认为隐藏
+     -->
     <cube-popup
       :mask-closable=true
       v-show="visible"
@@ -8,10 +12,17 @@
       type="shop-cart-list"
       :z-index=90
     >
+      <!--
+        购物列表的隐藏动画
+      -->
       <transition
         name="move"
         @after-leave="afterLeave"
       >
+        <!--
+          购物列表的显隐与弹出层相互绑定
+          购物列表的弹出层驱动购物列表的显隐
+        -->
         <div v-show="visible">
           <div class="list-header">
             <h1 class="title">购物车</h1>
@@ -52,6 +63,7 @@
     name: 'shop-cart-list',
     mixins: [popupMixin],
     props: {
+      // 购物车所有商品信息
       selectFoods: {
         type: Array,
         default() {
@@ -59,12 +71,8 @@
         }
       }
     },
-    created() {
-      this.$on(EVENT_SHOW, () => {
-        this.$nextTick(() => {
-          this.$refs.listContent.refresh()
-        })
-      })
+    mounted(){
+      this.$refs.listContent.refresh()
     },
     methods: {
       onAdd(target) {
@@ -73,6 +81,9 @@
       afterLeave() {
         this.$emit(EVENT_LEAVE)
       },
+      /**
+       * 隐藏当前的购物列表
+       */
       maskClick() {
         this.hide()
       },
@@ -100,6 +111,7 @@
 
 <style lang="stylus" scoped>
   @import "~common/stylus/variable"
+  // 购物列表弹出层的下边距
   .cube-shop-cart-list
     bottom: 48px
     &.fade-enter, &.fade-leave-active

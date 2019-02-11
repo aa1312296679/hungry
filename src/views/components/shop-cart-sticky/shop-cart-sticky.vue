@@ -1,8 +1,11 @@
 <template>
+  <!--
+    克隆版购物车默认隐藏
+  -->
   <div class="shop-cart-sticky" v-show="visible">
     <shop-cart
       ref="shopCart"
-      :selectFoods="selectFoods"
+      :selectGoods="selectFoods"
       :deliveryPrice="deliveryPrice"
       :minPrice="minPrice"
       :fold="fold"
@@ -20,24 +23,29 @@
     name: 'shop-cart-sticky',
     mixins: [popupMixin],
     props: {
+      // 克隆版购物车的所有选中商品
       selectFoods: {
         type: Array,
         default() {
           return []
         }
       },
+      // 商品配送费
       deliveryPrice: {
         type: Number,
         default: 0
       },
+      // 商品起步价
       minPrice: {
         type: Number,
         default: 0
       },
+      // 克隆版购物车的显隐状态
       fold: {
         type: Boolean,
         default: true
       },
+      // 购物车的购物列表
       list: {
         type: Object,
         default() {

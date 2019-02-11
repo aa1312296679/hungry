@@ -2,7 +2,7 @@
   <div class="goods" v-show="showStatus">
     <div class="scroll-nav-wrapper">
       <!--
-        生成滚动侧边栏导航
+        生成滚动侧边栏容器
       -->
       <cube-scroll-nav
         :side=true
@@ -10,21 +10,23 @@
         :options="scrollOptions"
         v-if="goods.length"
       >
-        <!--
-          配置滚动侧边栏的输出内容的HTML
-        -->
         <template slot="bar" slot-scope="props">
+          <!--
+            通过scroll-nav-bar遍历输出滚动侧边栏容器的所有侧边栏导航
+          -->
           <cube-scroll-nav-bar
             direction="vertical"
             :labels="props.labels"
             :txts="barTxts"
             :current="props.current"
           >
+            <!--
+              配置滚动侧边栏导航所输出的商品类文案格式
+            -->
             <template slot-scope="props">
               <div class="text">
                 <!--
-                  如果当前输出的侧边栏的商品类型存在ico图标
-                  输出该商品类型的侧边栏导航的ico图标
+                  如果当前商品类
                 -->
                 <support-ico
                   v-if="props.txt.type>=1"
@@ -36,7 +38,7 @@
                 -->
                 <span>{{props.txt.name}}</span>
                 <!--
-                   商品类侧边栏的商品总数
+                  当前商品类的总数
                 -->
                 <span class="num" v-if="props.txt.count">
                   <bubble :num="props.txt.count"></bubble>
@@ -46,7 +48,7 @@
           </cube-scroll-nav-bar>
         </template>
         <!--
-          遍历输出所有商品类的商品面板
+          遍历输出所有的商品类面板
         -->
         <cube-scroll-nav-panel
           v-for="good in goods"
@@ -56,7 +58,7 @@
         >
           <ul>
             <!--
-             遍历输出当前商品面板下的所有商品信息
+              遍历输出当前商品类面板下的所有商品
             -->
             <li
               @click="selectFood(food)"
@@ -77,6 +79,9 @@
                   <span class="now">￥{{food.price}}</span>
                   <span class="old" v-show="food.oldPrice">￥{{food.oldPrice}}</span>
                 </div>
+                <!--
+                    商品信息的增减控制按钮
+                 -->
                 <div class="cart-control-wrapper">
                   <cart-control @add="onAdd" :good="food"></cart-control>
                 </div>
@@ -86,10 +91,13 @@
         </cube-scroll-nav-panel>
       </cube-scroll-nav>
     </div>
+    <!--
+        购物车显示购物信息
+    -->
     <div class="shop-cart-wrapper">
       <shop-cart
         ref="shopCart"
-        :select-foods="selectFoods"
+        :select-goods="selectGoods"
         :delivery-price="seller.deliveryPrice"
         :min-price="seller.minPrice"></shop-cart>
     </div>
@@ -117,9 +125,9 @@
     },
     data() {
       return {
-        // 商品信息
+        // 所有商品
         goods: [],
-        // 选中商品
+        // 商品页的商品列表中被选中的商品
         selectedFood: {},
         // scroll-nav导航的配置信息
         scrollOptions: {
@@ -131,35 +139,50 @@
       }
     },
     computed: {
-      // 解析商品页数据源的商品数据
+      /**
+       *  解析商品页的数据源中的商品数据
+       * */
       seller() {
         return this.data.seller
       },
-      // 所有选中商品
-      selectFoods() {
+      /**
+       * 获取所有需要存入购物车商品
+      */
+      selectGoods() {
+        // 购物车商品
         let selectedGoods = []
+        // 遍历所有商品类别
         this.goods.forEach((item) => {
+          // 遍历当前商品类别下的所有商品
           item.foods.forEach((item) => {
+            // 如果当前商品存在商品总数
             if (item.count) {
+              // 将当前商品列为需要存入购物车的商品中
               selectedGoods.push(item)
             }
           })
         })
         return selectedGoods
       },
-      // 所有商品类别
+      /**
+       * 获取所有商品类别的商品类详情
+       * type 商品类的ico状态
+       * name 商品类名称
+       * count 商品类总数
+       */
       barTxts() {
         // 所有的商品类信息
         let ret = []
-        // 遍历当前商品页的所有商品信息
+        // 遍历当前商品页的所有商品
         this.goods.forEach((item) => {
           const {type, name, foods} = item
+          // 该商品类的商品总数
           let count = 0
-          // 计算该商品类的商品总数
+          // 遍历当前商品类的所有商品
           foods.forEach((food) => {
-            count += food.count || 0
+            count += food.count
           })
-          // 将当前商品类信息列入商品类集合
+          // 生成商品类对象并存入商品类信息
           ret.push({
             type,
             name,
@@ -170,7 +193,9 @@
       }
     },
     methods: {
-      // 跨域请求商品页的商品数据
+      /**
+       * 跨域请求商品页的商品数据
+        */
       fetch() {
         if (!this.fetched) {
           this.fetched = true
@@ -181,7 +206,9 @@
           })
         }
       },
-      // 商品面板的商品信息点击处理
+      /**
+       * 商品面板的商品信息点击处理
+        */
       selectFood(food) {
         // 获取选中商品的商品信息
         this.selectedFood = food
@@ -189,6 +216,10 @@
         this._showFood()
         this._showShopCartSticky()
       },
+      /**
+       * 商品增减按钮组件的递增动画处理
+       * @param target 触发购物动画的递增按钮
+       */
       onAdd(target) {
         this.$refs.shopCart.drop(target)
       },
@@ -212,7 +243,7 @@
       _showShopCartSticky() {
         this.shopCartStickyComp = this.shopCartStickyComp || this.$createShopCartSticky({
           $props: {
-            selectFoods: 'selectFoods',
+            selectFoods: 'selectGoods',
             deliveryPrice: this.seller.deliveryPrice,
             minPrice: this.seller.minPrice,
             fold: true

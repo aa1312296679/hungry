@@ -1,6 +1,9 @@
 <template>
   <div class="tab">
-   <!--tab切换的头部信息-->
+   <!--
+      tab切换的头部信息
+      通过v-model将tab头部信息与选中的选项卡名双向绑定
+   -->
     <cube-tab-bar
       :useTransition=false
       :showSlider=true
@@ -12,6 +15,9 @@
     </cube-tab-bar>
     <!--tab切换的面板部分-->
     <div class="slide-wrapper">
+      <!--
+        tab轮播切图视图层
+      -->
       <cube-slide
         :loop=false
         :auto-play=false
@@ -34,7 +40,7 @@
   export default {
     name: 'tab',
     props: {
-      // 所有切换页
+      // 所有tab页
       tabs: {
         type: Array,
         default() {
@@ -61,6 +67,7 @@
       }
     },
     computed: {
+      // tab头部导航信息切换处理
       selectedLabel: {
         // 获取被选中的tab选项卡的选项名
         get() {
@@ -79,14 +86,20 @@
       this.onChange(this.index)
     },
     methods: {
-      // tab选项页的与tab选项卡的联动处理
+      /**
+       * tab选项卡与tab轮播图的联动处理
+       * @pos 轮播切换的坐标值信息 x y
+       * */
       onScroll(pos) {
         const tabBarWidth = this.$refs.tabBar.$el.clientWidth
         const slideWidth = this.$refs.slide.slide.scrollerWidth
         const transform = -pos.x / slideWidth * tabBarWidth
         this.$refs.tabBar.setSliderTransform(transform)
       },
-      // 选项卡的视图切换处理
+      /**
+       * tab轮播图切换处理
+       * @current 被切换的轮播内容的内容索引
+      */
       onChange(current) {
         this.index = current
         const component = this.$refs.component[current]

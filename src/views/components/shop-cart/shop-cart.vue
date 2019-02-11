@@ -1,6 +1,9 @@
 <template>
   <div>
     <div class="shopcart">
+      <!--
+         购物车的购物列表的点击处理
+      -->
       <div class="content" @click="toggleList">
         <div class="content-left">
           <div class="logo-wrapper">
@@ -49,8 +52,8 @@
   export default {
     name: 'shop-cart',
     props: {
-      // 所有选中的商品
-      selectFoods: {
+      // 所有购物车商品
+      selectGoods: {
         type: Array,
         default() {
           return []
@@ -70,39 +73,48 @@
         type: Boolean,
         default: false
       },
+      // 当前购物车的购物列表的显隐
       fold: {
         type: Boolean,
+        // 默认为显示
         default: true
       }
     },
     data() {
       return {
         balls: null,
-        listFold: this.fold
+        // 当前购物车的购物列表的显隐状态
+        listFold: this.fold,
+        dropBalls: []
       }
     },
     created() {
-      this.dropBalls = []
       this.balls=this.createBalls();
     },
     computed: {
-      // 商品总价
+      /**
+       * 计算购物车所有商品的商品总价
+      */
       totalPrice() {
         let total = 0
-        this.selectFoods.forEach((food) => {
+        this.selectGoods.forEach((food) => {
           total += food.price * food.count
         })
         return total
       },
-      // 选中商品的商品总数
+      /**
+       * 计算购物车所有商品的商品总数
+      */
       totalCount() {
         let count = 0
-        this.selectFoods.forEach((food) => {
+        this.selectGoods.forEach((food) => {
           count += food.count
         })
         return count
       },
-      // 商品购物车提示信息
+      /**
+       * 生成当前购物车的购物车提示信息
+      */
       payDesc() {
         if (this.totalPrice === 0) {
           return `￥${this.minPrice}元起送`
@@ -113,7 +125,9 @@
           return '去结算'
         }
       },
-      // 商品购物车按钮状态
+      /**
+       * 当前购物车的购物结算按钮的按钮状态
+      */
       payClass() {
         if (!this.totalCount || this.totalPrice < this.minPrice) {
           return 'not-enough'
@@ -123,15 +137,24 @@
       }
     },
     methods: {
+      /**
+       * 购物车点击处理
+       * */
       toggleList() {
+        // 当前购物车的购物列表为显示
         if (this.listFold) {
+          // 如果当前购物车不存在任何商品中断购物列表的显示
           if (!this.totalCount) {
             return
           }
+          // 隐藏购物列表
           this.listFold = false
+          // 显示购物车的购物列表
           this._showShopCartList()
+          // 显示克隆版本购物车
           this._showShopCartSticky()
         } else {
+          // 显示购物列表
           this.listFold = true
           this._hideShopCartList()
         }
@@ -146,7 +169,9 @@
         }).show()
         e.stopPropagation()
       },
-      // 商品递增的购物球动画处理
+      /**
+       * 当前购物车的购物动画处理
+      */
       drop(el) {
         for (let i = 0; i < this.balls.length; i++) {
           const ball = this.balls[i]
@@ -158,7 +183,9 @@
           }
         }
       },
-      // 初始化购物车的所有购物动画球
+      /**
+       * 初始化购物车的所有购物动画球
+      */
      createBalls() {
         let balls = []
         for (let i = 0; i < BALL_LEN; i++) {
@@ -166,7 +193,9 @@
         }
         return balls
       },
-      // 购物球的过渡动画
+      /**
+       * 购物动画球的起始动画
+      */
       beforeDrop(el) {
         // 计算购物动画球的球体位置
         const ball = this.dropBalls[this.dropBalls.length - 1]
@@ -179,6 +208,11 @@
         const inner = el.getElementsByClassName(innerClsHook)[0]
         inner.style.transform = inner.style.webkitTransform = `translate3d(${x}px,0,0)`
       },
+      /**
+       * 购物动画球的执行动画
+       * @param el  显示的购物球
+       * @param done 结束动画
+       */
       dropping(el, done) {
         this._reflow = document.body.offsetHeight
         el.style.transform = el.style.webkitTransform = `translate3d(0,0,0)`
@@ -186,44 +220,62 @@
         inner.style.transform = inner.style.webkitTransform = `translate3d(0,0,0)`
         el.addEventListener('transitionend', done)
       },
+      /**
+       * 购物动画球的结束动画
+       * @param el 显示的购物球
+       */
       afterDrop(el) {
         // 取出所有动画球中处于显示状态的动画球
         const ball = this.dropBalls.shift()
-        // 将动画球重置为隐藏
+        // 将购物动画球重置为隐藏
         if (ball) {
           ball.show = false
           el.style.display = 'none'
         }
       },
+      /**
+       * 购物车的购物列表显示处理
+        */
       _showShopCartList() {
         this.shopCartListComp = this.shopCartListComp || this.$createShopCartList({
+          // 配置购物车的购物列表的所有购买商品
           $props: {
-            selectFoods: 'selectFoods'
+            selectFoods: 'selectGoods'
           },
           $events: {
+            // 配置购物列表的隐藏处理
             leave: () => {
               this._hideShopCartSticky()
             },
+            // 配置购物列表的显示处理
             hide: () => {
               this.listFold = true
             },
+            // 配置购物列表的新增按钮的购物动画处理
             add: (el) => {
               this.shopCartStickyComp.drop(el)
             }
           }
         })
+        // 显示购物列表
         this.shopCartListComp.show()
       },
+      /**
+       * 显示克隆版购物车
+       * @private
+       */
       _showShopCartSticky() {
+        // 创建克隆版购物车的管理对象
         this.shopCartStickyComp = this.shopCartStickyComp || this.$createShopCartSticky({
           $props: {
-            selectFoods: 'selectFoods',
+            selectFoods: 'selectGoods',
             deliveryPrice: 'deliveryPrice',
             minPrice: 'minPrice',
             fold: 'listFold',
             list: this.shopCartListComp
           }
         })
+        // 显示克隆版本购物车
         this.shopCartStickyComp.show()
       },
       _hideShopCartList() {
@@ -235,6 +287,7 @@
       }
     },
     watch: {
+      // 实时更新购物列表显隐状态
       fold(newVal) {
         this.listFold = newVal
       },

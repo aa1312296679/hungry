@@ -22,7 +22,9 @@
       }
     },
     methods: {
-      // 商品总数递增
+      /**
+       * 商品总数递增
+       * */
       add(event) {
         if (!this.good.count) {
           this.$set(this.good, 'count', 1)
@@ -31,7 +33,9 @@
         }
         this.$emit(EVENT_ADD, event.target)
       },
-      // 商品总数递减
+      /**
+       * 商品总数递减
+      */
       decrease() {
         if (this.good.count) {
           this.good.count--
